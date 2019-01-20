@@ -1,0 +1,12 @@
+
+-w3
+-es2
+#-icon=hc.ico
+-o${hb_dir}../bin/
+-run
+
+hc.prg
+../res/hc.rc
+
+hc.hbc
+hbct.hbc

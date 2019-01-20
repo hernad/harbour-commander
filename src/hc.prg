@@ -62,6 +62,7 @@ PROCEDURE Main()
 
    hb_gtInfo( HB_GTI_RESIZEMODE, HB_GTI_RESIZEMODE_ROWS )
    hb_gtInfo( HB_GTI_WINTITLE, "Harbour Commander" )
+   hb_GtInfo( HB_GTI_ICONRES , "HCICON" ) 
 
    aPanelLeft := PanelInit()
    aPanelRight := PanelInit()
@@ -112,18 +113,18 @@ STATIC PROCEDURE PanelFetchList( aPanel, cDir )
    FOR i := 1 TO Len( aPanel[ _aDirectory ] )  // ? na AEval()
       AAdd( aPanel[ _aDirectory ][ i ], .T. )
    NEXT
-   
-   FOR each iDot in aDots
-      if ( nPos := AScan( aPanel[ _aDirectory ], {| x | x[ F_NAME ] == iDot } ) ) > 0
-         if iDot:__enumIndex == 2
+
+   FOR EACH iDot in aDots
+      IF ( nPos := AScan( aPanel[ _aDirectory ], {| x | x[ F_NAME ] == iDot } ) ) > 0
+         IF iDot:__enumIndex == 2
             a2Dot := aPanel[ _aDirectory ][ nPos ]
-         endif
+         ENDIF
          hb_ADel( aPanel[ _aDirectory ], nPos, .T. )
-      endif
+      ENDIF
    NEXT
    ASort( aPanel[ _aDirectory ],,, {| x, y | DIR_PREFIX( x ) + OSUPPER( x[ F_NAME ] ) < DIR_PREFIX( y ) + OSUPPER( y[ F_NAME ] ) } )
-   IF hb_IsArray( a2Dot )
-      hb_AIns( aPanel[ _aDirectory ], 1 , a2Dot, .T. )
+   IF HB_ISARRAY( a2Dot )
+      hb_AIns( aPanel[ _aDirectory ], 1, a2Dot, .T. )
    ENDIF
 
    RETURN
@@ -205,7 +206,8 @@ STATIC PROCEDURE Prompt()
          IF Empty( aPanelSelect[ _cComdLine ] )
             /* jeżeli stoimy na pliku */
             IF At( "D", aPanelSelect[ _aDirectory ][ nPos ][ F_ATTR ] ) == 0
-               hb_run( aPanelSelect[ _cCurrentDir ] + aPanelSelect[ _aDirectory ][ nPos ][ F_NAME ] )
+               // hb_run( aPanelSelect[ _cCurrentDir ] + aPanelSelect[ _aDirectory ][ nPos ][ F_NAME ] )
+               hc_Exec( aPanelSelect[ _cCurrentDir ] + aPanelSelect[ _aDirectory ][ nPos ][ F_NAME ] )
             ELSE
                ChangeDir( aPanelSelect )
             ENDIF
@@ -280,7 +282,8 @@ STATIC PROCEDURE Prompt()
          nPos := aPanelSelect[ _nRowBar ] + aPanelSelect[ _nRowNo ]
          /* jeżeli stoimy na pliku */
          IF At( "D", aPanelSelect[ _aDirectory ][ nPos ][ F_ATTR ] ) == 0
-            hb_run( aPanelSelect[ _cCurrentDir ] + aPanelSelect[ _aDirectory ][ nPos ][ F_NAME ] )
+            // hb_run( aPanelSelect[ _cCurrentDir ] + aPanelSelect[ _aDirectory ][ nPos ][ F_NAME ] )
+            hc_Exec( aPanelSelect[ _cCurrentDir ] + aPanelSelect[ _aDirectory ][ nPos ][ F_NAME ] )
          ELSE
             ChangeDir( aPanelSelect )
          ENDIF
@@ -346,8 +349,8 @@ STATIC PROCEDURE Prompt()
          nCol := Int( nMaxCol / 10 ) + 1
          IF nMRow > nMaxRow - 1
             SWITCH Int( MCol() / nCol ) + 1
-            CASE 1  ; EXIT
-            CASE 2  ; EXIT
+            CASE 1  ; FunctionKey_F1() ; EXIT
+            CASE 2  ; FunctionKey_F2() ; EXIT
             CASE 3  ; FunctionKey_F3( aPanelSelect ) ; EXIT
             CASE 4  ; FunctionKey_F4( aPanelSelect ) ; EXIT
             CASE 5  ; FunctionKey_F5( aPanelSelect ) ; EXIT
@@ -519,9 +522,13 @@ STATIC PROCEDURE Prompt()
 
       CASE K_F1
 
+         FunctionKey_F1()
+
          EXIT
 
       CASE K_F2
+
+         FunctionKey_F2()
 
          EXIT
 
@@ -681,11 +688,29 @@ STATIC PROCEDURE Prompt()
 
    RETURN
 
-// STATIC PROCEDURE FunctionKey_F1( aPanel )
-// RETURN
+STATIC PROCEDURE FunctionKey_F1()
 
-// STATIC PROCEDURE FunctionKey_F2( aPanel )
-// RETURN
+   IF HC_Alert( "Report an error", ;
+         "Creating an issue;" + ;
+         ";Issues can be used to keep track of bugs, enhancements, or;" + ;
+         "other requests.;" + ;
+         ";Any GitHub user can create an issue in a public repository;" + ;
+         "where issues have not been disabled.;" + ;
+         ";You can open a new issue based on code from an existing pull;" + ;
+         "request.;", ;
+         { "Click New issue." } ) == 1
+
+      hb_run( "start " + "https://github.com/rjopek/harbour-commander/issues/new" )
+
+   ENDIF
+
+   RETURN
+
+STATIC PROCEDURE FunctionKey_F2()
+
+   HC_MenuF2()
+
+   RETURN
 
 STATIC PROCEDURE FunctionKey_F3( aPanel )
 
@@ -1235,12 +1260,16 @@ STATIC PROCEDURE PanelDisplay( aPanel )
       nLengthSize := Max( nLengthSize, Len( Str( x[ 2 ] ) ) ) } )
 
    DispBegin()
+
    IF aPanelSelect == aPanel
       hb_DispBox( aPanel[ _nTop ], aPanel[ _nLeft ], aPanel[ _nBottom ], aPanel[ _nRight ], HB_B_DOUBLE_UNI + " ", 0x1f )
    ELSE
       hb_DispBox( aPanel[ _nTop ], aPanel[ _nLeft ], aPanel[ _nBottom ], aPanel[ _nRight ], HB_B_SINGLE_UNI + " ", 0x1f )
    ENDIF
-
+/* The item will be displayed from the menu selection
+   hb_DispOutAt( aPanel[ _nTop ], aPanel[ _nLeft ] + 1, PadR( hb_StrShrink( aPanel[ _cCurrentDir ], 1 ), ;
+      Min( aPanel[ _nRight ] - aPanel[ _nLeft ] - 1, Len( aPanel[ _cCurrentDir ] ) ) ), "GR+/W"  )
+*/
    nPos += aPanel[ _nRowNo ]
    FOR nRow := aPanel[ _nTop ] + 1 TO aPanel[ _nBottom ] - 1
 
@@ -1262,6 +1291,8 @@ STATIC PROCEDURE PanelDisplay( aPanel )
 
    NEXT
 
+   // PanelTitleDisplay( aPanel )
+
    DispEnd()
 
    RETURN
@@ -1280,12 +1311,31 @@ STATIC PROCEDURE ComdLineDisplay( aPanel )
    DispEnd()
 
    RETURN
+/* The item will be displayed from the menu selection
+STATIC PROCEDURE PanelTitleDisplay( aPanel )
 
+   LOCAL cPanelTitle
+   LOCAL nWidthPanel
+
+   nWidthPanel := aPanel[ _nRight ] - aPanel[ _nLeft ]
+   cPanelTitle := PadR( aPanel[ _cCurrentDir ], Min( Len( aPanel[ _cCurrentDir ] ), nWidthPanel ), Space( 0 ) )
+   IF Len( cPanelTitle ) >= nWidthPanel - 2
+      cPanelTitle := SubStr( cPanelTitle, 1, nWidthPanel - 2 ) + ">"
+   ENDIF
+
+   DispBegin()
+
+   hb_DispOutAt( aPanel[ _nTop ], aPanel[ _nLeft ] + 1, cPanelTitle, "GR+/W"  )
+
+   DispEnd()
+
+   RETURN
+*/
 STATIC FUNCTION Expression( nLengthName, nLengthSize, cName, cSize, dDate, cAttr )
 
    LOCAL cFileName, cFileSize, dFileDate, cFileAttr
 
-   iif( nLengthName == 2, nLengthName := 4, nLengthName ) // ?
+   iif( nLengthName == 2, nLengthName := 4, nLengthName )
 
    cFileName := PadR( cName + Space( nLengthName ), nLengthName ) + " "
 
@@ -1628,7 +1678,8 @@ STATIC PROCEDURE MsgBoxDisplay( cString, nCol, nColNo )
 STATIC FUNCTION HC_Alert( cTitle, xMessage, xOptions, nColorNorm, nArg )
 
    LOCAL nOldCursor := SetCursor( SC_NONE )
-   LOCAL nRowPos := Row(), nColPos := Col()
+
+   // LOCAL nRowPos := Row(), nColPos := Col()
    LOCAL aMessage, aOptions, aPos
    LOCAL nColorHigh
    LOCAL nLenOptions, nLenMessage
@@ -1657,7 +1708,6 @@ STATIC FUNCTION HC_Alert( cTitle, xMessage, xOptions, nColorNorm, nArg )
       aMessage := xMessage
    CASE ValType( xMessage ) == "N"
       aMessage := hb_ATokens( hb_CStr( xMessage ) )
-
    ENDCASE
 
    DO CASE
@@ -1676,7 +1726,6 @@ STATIC FUNCTION HC_Alert( cTitle, xMessage, xOptions, nColorNorm, nArg )
    CASE ValType( nColorNorm ) == "N"
       nColorNorm := hb_bitAnd( nColorNorm, 0xff )
       nColorHigh := hb_bitAnd( hb_bitOr( hb_bitShift( nColorNorm, - 4 ), hb_bitShift( nColorNorm, 4 ) ), 0x77 )
-
    ENDCASE
 
    nLenOptions := Len( aOptions )
@@ -1766,7 +1815,7 @@ STATIC FUNCTION HC_Alert( cTitle, xMessage, xOptions, nColorNorm, nArg )
             ENDDO
 
          ENDIF
-        
+
          FOR i := 1 TO nLenOptions
             IF MRow() == nPos + 2 .AND. MCol() >= aPos[ i ] .AND. MCol() <= aPos[ i ] + Len( aOptions[ i ] ) + 1
                nChoice := i
@@ -1822,7 +1871,185 @@ STATIC FUNCTION HC_Alert( cTitle, xMessage, xOptions, nColorNorm, nArg )
 
    WClose( 1 )
    SetCursor( nOldCursor )
-   SetPos( nRowPos, nColPos )
+   // SetPos( nRowPos, nColPos )
+
+   RETURN iif( nKey == 0, 0, nChoice )
+
+STATIC FUNCTION HC_MenuF2()
+
+   LOCAL nOldCursor := SetCursor( SC_NONE )
+   LOCAL cFile := "hc.menu"
+   LOCAL cCopyExample := ""
+   LOCAL aMenu, cLine
+   LOCAL nMaxRow := 0, nMaxCol := 0
+   LOCAL nRow := 1
+   LOCAL nKey, nKeyStd
+   LOCAL nColLength := 0
+   LOCAL nTop, nLeft, nBottom, nRight
+   LOCAL nChoice := 1
+   LOCAL nRowPos := 1, nColPos := 2
+   LOCAL nMRow, nMCol
+
+   IF ! hb_vfExists( "hc.menu" )
+
+      /* Przykład budowy menu, zapisuje ciąg znaków do zbioru dyskowego, edycja z pliku hc.menu */
+      cCopyExample += "F1:Compilation of my project in Harbour" + hb_eol()
+      cCopyExample += "hbmk2 hc.prg" + hb_eol()
+      cCopyExample += "F2:Checking version of GCC compiler" + hb_eol()
+      cCopyExample += "gcc --version" + hb_eol()
+      cCopyExample += "F3:What is my OS version" + hb_eol()
+      cCopyExample += "uname -a"
+
+      /* Jeśli nie jest określona ścieżka, hb_MemoWrit() zapisuje cCopyExample w aktualnym katalogu */
+      hb_MemoWrit( "hc.menu", cCopyExample )
+
+   ENDIF
+
+   aMenu := hb_ATokens( hb_MemoRead( cFile ), .T. )
+
+   AScan( aMenu, {| str | nColLength := Max( nColLength, Len( str ) ) } )
+
+   DO WHILE .T.
+
+      DispBegin()
+
+      IF nMaxRow != MaxRow( .T. ) .OR. nMaxCol != MaxCol( .T. )
+
+         WSelect( 0 )
+
+         nMaxRow := MaxRow( .T. )
+         nMaxCol := MaxCol( .T. )
+
+         nTop    := Int( nMaxRow / 3 ) - 3
+         nLeft   := Int( ( nMaxCol - nColLength ) / 2 ) - 2
+         nBottom := nTop + 4 + Len( aMenu )
+         nRight  := Int( ( nMaxCol + nColLength ) / 2 ) - 1 + 2
+
+         WClose( 1 )
+         WSetShadow( 0x8 )
+         WOpen( nTop, nLeft, nBottom, nRight, .T. )
+
+         hb_DispBox( 0, 0, nMaxRow, nMaxCol, hb_UTF8ToStrBox( " █       " ), 0x9f )
+         hb_DispOutAt( 0, 0, Center( hb_UserName() + "  Menu" ), 0xf0 )
+
+         hb_DispBox( 1, 0, MaxRow(), MaxCol(), HB_B_SINGLE_UNI, 0x9f )
+
+      ENDIF
+
+      DispEnd()
+
+      FOR EACH cLine IN aMenu
+
+         hb_DispOutAt( nRowPos + cLine:__enumIndex(), nColPos, ;
+            PadR( cLine, nColLength ), ;
+            iif( cLine:__enumIndex() == nRow, 0xf, 0x9f ) )
+
+         iif( cLine:__enumIndex() == nRow, nChoice := cLine:__enumIndex(), NIL )
+
+      NEXT
+
+      DispEnd()
+
+      nKey := Inkey( 0 )
+      nKeyStd := hb_keyStd( nKey )
+
+      DO CASE
+      CASE nKeyStd == K_ESC
+         nChoice := 0
+         EXIT
+
+      CASE nKeyStd == K_ENTER .OR. nKeyStd == K_SPACE
+         EXIT
+
+      CASE nKeyStd == K_MOUSEMOVE
+
+         IF nRowPos < MRow() .AND. nColPos < MCol() .AND. nRowPos + Len( aMenu ) >= MRow() .AND. nColPos + nColLength > MCol()
+            nRow := MRow() - nRowPos
+         ENDIF
+
+      CASE nKeyStd == K_LBUTTONDOWN
+
+         nMCol := MCol()
+         nMRow := MRow()
+
+         IF MRow() == 0 .AND. MCol() >= 0 .AND. MCol() <= MaxCol()
+
+            DO WHILE MLeftDown()
+               WMove( WRow() + MRow() - nMRow, WCol() + MCol() - nMCol )
+            ENDDO
+
+         ENDIF
+
+         IF nRowPos < MRow() .AND. nColPos < MCol() .AND. nRowPos + Len( aMenu ) >= MRow() .AND. nColPos + nColLength > MCol()
+            RETURN nChoice
+         ENDIF
+
+      CASE nKeyStd == K_MWFORWARD
+
+         IF nRowPos < MRow() .AND. nColPos < MCol() .AND. nRowPos + Len( aMenu ) >= MRow() .AND. nColPos + nColLength > MCol()
+            IF nRow > 1
+               nRow--
+            ELSE
+               nRow := Len( aMenu )
+            ENDIF
+         ENDIF
+
+      CASE nKeyStd == K_MWBACKWARD
+
+         IF nRowPos < MRow() .AND. nColPos < MCol() .AND. nRowPos + Len( aMenu ) >= MRow() .AND. nColPos + nColLength > MCol()
+            IF nRow < Len( aMenu )
+               nRow++
+            ELSE
+               nRow := 1
+            ENDIF
+         ENDIF
+
+      CASE nKeyStd == K_UP
+
+         IF nRow > 1
+            nRow--
+         ELSE
+            nRow := Len( aMenu )
+         ENDIF
+
+      CASE nKeyStd == K_DOWN
+
+         IF nRow < Len( aMenu )
+            nRow++
+         ELSE
+            nRow := 1
+         ENDIF
+
+      CASE nKeyStd == K_CTRL_UP
+         WMove( WRow() - 1, WCol() )
+
+      CASE nKeyStd == K_CTRL_DOWN
+         WMove( WRow() + 1, WCol() )
+
+      CASE nKeyStd == K_CTRL_LEFT
+         WMove( WRow(), WCol() - 1 )
+
+      CASE nKeyStd == K_CTRL_RIGHT
+         WMove( WRow(), WCol() + 1 )
+
+      CASE nKeyStd == HB_K_RESIZE
+
+         WClose( 1 )
+
+         AutoSize()
+
+         PanelDisplay( aPanelLeft )
+         PanelDisplay( aPanelRight )
+         ComdLineDisplay( aPanelSelect )
+
+         BottomBar()
+
+      ENDCASE
+
+   ENDDO
+
+   WClose( 1 )
+   SetCursor( nOldCursor )
 
    RETURN iif( nKey == 0, 0, nChoice )
 
@@ -2244,3 +2471,20 @@ STATIC FUNCTION FileError()
 FUNCTION Q( xPar )
    RETURN Alert( hb_ValToExp( xPar ) )
 // ====================================
+
+PROCEDURE hc_Exec( cArg )
+#if defined( __PLATFORM__WINDOWS )
+   IF " " $ cArg
+      cArg := '"' + cArg + '"'
+   ENDIF
+   IF (wapi_ShellExecute( 0, , cArg, , hb_cwd(), 1 ) < 32)
+      /* wapi_ShellExecute() failed! try hb_run(), just in case... */
+      hb_Run( cArg )
+   ENDIF
+#else
+   hb_Run( cArg )
+#endif
+
+   RETURN
+
+
