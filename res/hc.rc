@@ -1,8 +1,8 @@
 HCICON ICON hc.ico
 
 1 VERSIONINFO
-FILEVERSION 1,0,0,0
-PRODUCTVERSION 1,0,0,0
+FILEVERSION 0,1,0,0
+PRODUCTVERSION 0,1,0,0
 FILEOS 0x4
 FILETYPE 0x1
 {
@@ -11,17 +11,17 @@ BLOCK "StringFileInfo"
    BLOCK "040904b0"
    {
       VALUE "FileDescription", "Harbour File Manager\0"
-      VALUE "FileVersion", "1.0.0.0\0"
+      VALUE "FileVersion", "0.1.0.0\0"
       VALUE "InternalName", "HC\0"
       VALUE "LegalCopyright", "2017-2019 Rafal Jopek\0"
       VALUE "LegalTrademarks", "\0"
       VALUE "OriginalFilename", "hc.exe\0"
       VALUE "CompanyName", "Harbour Commander Team\0"
       VALUE "ProductName", "Harbour Commander\0"
-      VALUE "ProductVersion", "1.0.0.0\0"
+      VALUE "ProductVersion", "0.1.0.0\0"
       VALUE "Info", "https://github.com/rjopek/harbour-commander\0"
       VALUE "Comments", "\0"
-      VALUE "Toolset",  "Developed with Harbour\0"
+      VALUE "Toolset",  "Developed with Harbour <https://github.com/harbour/core>\0"
    }
 }
 
