@@ -4,6 +4,10 @@
 
 description=Harbour-Commmander
 
-{unix|linux|darwin}gt=gtxwc
-{win}gt=gtwvt
+#{unix|linux|darwin}gt=gtxwc
+#{win}gt=gtwvt
+
+{unix|linux|darwin}gt=gttrm
+#{win}gt=gtwin
+
 {win}libs=hbwin
